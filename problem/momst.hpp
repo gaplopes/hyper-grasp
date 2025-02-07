@@ -15,10 +15,6 @@ class UnionFind {
     }
   }
 
-  bool can_unite(int32_t u, int32_t v) const {
-    return find(u) != find(v);
-  }
-
   bool unite(int32_t u, int32_t v) {
     u = find(u);
     v = find(v);
@@ -33,6 +29,10 @@ class UnionFind {
     }
     parent[v] = u;
     return true;
+  }
+
+  bool can_unite(int32_t u, int32_t v) const {
+    return find(u) != find(v);
   }
 
  private:
@@ -214,7 +214,89 @@ class MOMST : public ProblemBase<Solution, Candidate> {
   }
 
   [[nodiscard]] std::tuple<Solution, std::vector<Solution>> improveSolution(const Solution& current_solution, const std::vector<Solution>& solution_set) const override {
-    return std::make_tuple(Solution(), std::vector<Solution>());
+    // Implement the logic to improve a solution for MOMST
+    std::vector<int32_t> used_edges;
+    std::vector<int32_t> unused_edges;
+    used_edges.reserve(this->E);
+    unused_edges.reserve(this->E);
+
+    for (int i = 0; i < this->E; ++i) {
+      if (this->current_used_edges[i]) {  // Directly check the value
+        used_edges.push_back(i);
+      } else {
+        unused_edges.push_back(i);
+      }
+    }
+
+    // First Improvement Local Search
+    std::vector<Solution> other_solutions;
+    Solution best_solution = current_solution;
+    UnionFind best_union_find = this->current_union_find;
+
+    const int32_t n_used = used_edges.size();
+    const int32_t n_unused = unused_edges.size();
+    const int32_t n_total = n_used * n_unused;
+    std::vector<int32_t> swap_indices(n_total);
+    std::iota(swap_indices.begin(), swap_indices.end(), 0);
+
+    while (true) {
+      std::random_shuffle(used_edges.begin(), used_edges.end());
+      std::random_shuffle(unused_edges.begin(), unused_edges.end());
+      std::random_shuffle(swap_indices.begin(), swap_indices.end());
+
+      HypervolumeIndicator<int64_t, Solution> hv_space(best_solution, false);
+      int64_t best_hv = 0;
+
+      for (auto i : swap_indices) {
+        int32_t idx_used = i / n_unused;
+        int32_t idx_unused = i % n_unused;
+        int32_t used_edge = used_edges[idx_used];
+        int32_t unused_edge = unused_edges[idx_unused];
+
+        // Check if the edge can be added to the current solution
+        UnionFind uf_aux(V);
+        bool valid = true;
+        for (size_t j = 0; j < used_edges.size(); ++j) {
+          if (j == static_cast<size_t>(idx_used)) continue;
+          const Edge& edge = this->edges[used_edges[j]];
+          if (!uf_aux.unite(edge.src, edge.dst)) {
+            valid = false;
+            break;
+          }
+        }
+        if (!uf_aux.unite(edges[unused_edge].src, edges[unused_edge].dst)) {
+          continue;
+        }
+
+        // Compute the candidate solution
+        Solution candidate_solution = best_solution;
+        for (int j = 0; j < M; j++) {
+          candidate_solution[j] -= this->edges[used_edge].values[j];
+          candidate_solution[j] += this->edges[unused_edge].values[j];
+        }
+
+        if (is_non_dominated(candidate_solution, solution_set, false) &&
+            is_non_dominated(candidate_solution, other_solutions, false)) {
+          remove_weakly_dominated(other_solutions, candidate_solution, false);
+          other_solutions.push_back(candidate_solution);
+        }
+
+        const int64_t hv = hv_space.contribution(candidate_solution);
+        if (weakly_dominates(candidate_solution, best_solution, false) || hv > best_hv) {
+          best_solution = candidate_solution;
+          best_hv = hv;
+          std::swap(used_edges[idx_used], unused_edges[idx_unused]);
+          break;
+        }
+      }
+      if (best_hv == 0) {
+        break;
+      }
+    }
+    // Remove weakly dominated solutions
+    remove_weakly_dominated(other_solutions, best_solution, false);
+    // Return the best solution and the other solutions
+    return {best_solution, other_solutions};
   }
 
  private:

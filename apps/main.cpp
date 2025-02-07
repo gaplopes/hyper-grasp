@@ -62,6 +62,7 @@ int main(int argc, char* argv[]) {
 
   // Output the parsed values
   std::cout << "Command line arguments:\n";
+  std::cout << " - is_maximization: " << std::boolalpha << is_maximization << "\n";
   std::cout << " - local_search: " << std::boolalpha << local_search << "\n";
   std::cout << " - alpha: " << alpha << "\n";
   std::cout << " - criteria: " << criteria << "\n";

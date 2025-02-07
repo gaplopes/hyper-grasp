@@ -328,7 +328,7 @@ class MOKP : public ProblemBase<Solution, Candidate> {
           continue;
         }
 
-        std::vector<int64_t> candidate_solution = best_solution;
+        Solution candidate_solution = best_solution;
         for (int j = 0; j < M; j++) {
           candidate_solution[j] -= items[used_item].values[j];
           candidate_solution[j] += items[unused_item].values[j];
