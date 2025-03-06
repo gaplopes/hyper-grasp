@@ -27,7 +27,7 @@ class HyperGRASP {
     // Initialize variables for the algorithm
     std::vector<Solution> solutions;
     Solution ref_point = problem.getReferencePoint();
-    HypervolumeIndicator<int64_t, Solution> hvc_space = HypervolumeIndicator<int64_t, Solution>(ref_point, is_maximization);
+    HypervolumeIndicator<int64_t, Solution> hvc_space(ref_point, is_maximization);
 
     // Initialize variables for statistics
     std::vector<std::tuple<int32_t, int64_t>> statistics;

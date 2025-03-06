@@ -62,18 +62,18 @@ if (NOT CLI11_FOUND)
   FetchContent_MakeAvailable(cli11)
 endif()
 
-# find_package(mooutils QUIET)
-# # If mooutils not found fallback to github
-# if (NOT mooutils_FOUND)
-#   include(FetchContent)
-#   FetchContent_Declare(
-#     mooutils
-#     GIT_REPOSITORY https://github.com/adbjesus/mooutils.git
-#     GIT_TAG main
-#   )
-#   FetchContent_MakeAvailable(mooutils)
-#   add_library(mooutils::mooutils ALIAS mooutils)
-# endif()
+find_package(mooutils QUIET)
+# If mooutils not found fallback to github
+if (NOT mooutils_FOUND)
+  include(FetchContent)
+  FetchContent_Declare(
+    mooutils
+    GIT_REPOSITORY https://github.com/adbjesus/mooutils.git
+    GIT_TAG main
+  )
+  FetchContent_MakeAvailable(mooutils)
+  add_library(mooutils::mooutils ALIAS mooutils)
+endif()
 
 # Add include directories
 include_directories(${CMAKE_SOURCE_DIR}/include)
@@ -90,7 +90,7 @@ add_executable(hyper-grasp
 # Link the executable with the libraries
 target_link_libraries(hyper-grasp
   PRIVATE
-    # mooutils::mooutils
+    mooutils::mooutils
     CLI11::CLI11
 )
 
