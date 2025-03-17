@@ -81,6 +81,12 @@ class Statistics {
     return stats_str;
   }
 
+  void to_file(const std::string& filename) {
+    std::ofstream file(filename);
+    file << to_string();
+    file.close();
+  }
+
  private:
   int n_nondominated_set = 0;
   int n_solutions = 0;

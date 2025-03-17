@@ -216,9 +216,9 @@ class MOKP : public ProblemBase<Solution, Candidate> {
     }
     // Read the nondominated set
     std::vector<Solution> nondominated_set;
-    if (!is.eof()) {
-      int32_t n_nondominated_set;
-      is >> n_nondominated_set;
+    int32_t n_nondominated_set = 0;
+    // Try to read the number of nondominated solutions
+    if (is >> n_nondominated_set) {
       nondominated_set = std::vector<Solution>(n_nondominated_set, Solution(M, 0));
       for (int i = 0; i < n_nondominated_set; i++) {
         for (int j = 0; j < M; j++) {
@@ -382,13 +382,13 @@ class MOKP : public ProblemBase<Solution, Candidate> {
   }
 
  private:
-  const int32_t N; // Number of items
-  const int32_t M; // Number of objectives
-  const int64_t W; // Maximum Knapsack weight
-  const std::vector<int64_t> weights; // Weights of the items
-  const std::vector<std::vector<int64_t>> values; // Values of the items
-  const std::vector<Item> items; // Items
-  const std::vector<Solution> nondominated_set; // Nondominated set
+  const int32_t N;                                 // Number of items
+  const int32_t M;                                 // Number of objectives
+  const int64_t W;                                 // Maximum Knapsack weight
+  const std::vector<int64_t> weights;              // Weights of the items
+  const std::vector<std::vector<int64_t>> values;  // Values of the items
+  const std::vector<Item> items;                   // Items
+  const std::vector<Solution> nondominated_set;    // Nondominated set
   Solution reference_point;
   UpperBound current_upper_bound;
   Solution current_solution;
