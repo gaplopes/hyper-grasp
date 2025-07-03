@@ -1,6 +1,8 @@
-# Instance File Format
+# Multiobjective Combinatorial Optimization Instances
 
-This directory contains instances for some of the implemented Multiobjective Combinatorial Optimization Problems.
+This directory contains instances for some of the implemented Multiobjective Combinatorial Optimization Problems, specifically the Multiobjective Knapsack Problem (MOKP) and the Multiobjective Minimum Spanning Tree (MOMST).
+
+The instances for the Multiobjective Knapsack Problem (MOKP) and Multiobjective Minimum Spanning Tree (MOMST) are provided in separate folders. Each instance file contains the problem data in a specific format, which is described below.
 
 ## Multiobjective Knapsack Problem (MOKP)
 
@@ -40,8 +42,11 @@ vn v1 v2 ... vm       // values for solution n
 5 3 5     // item 3: values [3,5], weight 5
 ```
 
-The current instances are based on the following sources:
-- [mobkp-instances](https://github.com/gaplopes/mobkp-instances)
+In the MOKP instances folder, there are two folders: `article` and `random`.
+
+- The `article` folder contains instances from the article by [Bazgan et al. (2009)](https://doi.org/10.1016/j.cor.2007.09.009) (adapted to the format used in this work).
+
+- The `random` folder contains random instances from the [mobkp-instances](https://github.com/gaplopes/mobkp-instances).
 
 ## Multiobjective Minimum Spanning Tree (MOMST)
 
@@ -80,4 +85,14 @@ vN v1 v2 ... vM         // values for solution N
 2 3 2 2    // edge 5: 2->3, values [2,2]
 ```
 
-The current instances are based on the same sources script as the MOKP instances.
+In the MOMST instances folder, there are two folders: `article` and `complete`.
+
+- The `article` folder contains instances from the article by [Fernandes et al. (2020)](https://doi.org/10.1007/s10589-019-00154-1) (adapted to the format used in this work).
+
+- The `complete` folder contains instances of complete graphs generated based on the same sources script as the random MOKP instances (see [mobkp-instances](https://github.com/gaplopes/mobkp-instances)).
+
+## References:
+
+[1]: Bazgan, C., Hugot, H., & Vanderpooten, D. (2009). "Solving efficiently the 0–1 multi-objective knapsack problem." *Computers & Operations Research*, 36(1), 260-279. [DOI: 10.1016/j.cor.2007.09.009](https://doi.org/10.1016/j.cor.2007.09.009)
+
+[2]: Fernandes, I.F.C., Goldbarg, E.F.G., Maia, S.M.D.M. et al. (2020). "Empirical study of exact algorithms for the multi-objective spanning tree." *Computers & Operations Research*, 75, 561–605. [DOI: 10.1007/s10589-019-00154-1](https://doi.org/10.1007/s10589-019-00154-1)

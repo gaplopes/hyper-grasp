@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <dominance.hpp>
-#include <hypervolume_indicator.hpp>
+#include <indicator.hpp>
 #include <iostream>
 #include <problem_base.hpp>
 #include <utility>
@@ -191,6 +191,7 @@ class MOKP : public ProblemBase<Solution, Candidate> {
         current_weight(W) {
     // Initialize the reference point
     this->reference_point = std::vector<int64_t>(M, 0);
+    this->sorted_items_objectives = sortItemsObjectives(items);
   }
 
  public:
@@ -208,6 +209,7 @@ class MOKP : public ProblemBase<Solution, Candidate> {
       for (int j = 0; j < M; j++) {
         is >> values[i][j];
       }
+      // is >> weights[i];
     }
     // Pre-process the items and sort them by the ratio of values[i]/weight
     std::vector<Item> items = std::vector<Item>();
@@ -245,12 +247,14 @@ class MOKP : public ProblemBase<Solution, Candidate> {
   }
 
   [[nodiscard]] std::vector<Candidate> generateCandidates(const Solution& current_solution,
+                                                          const std::vector<Solution>& solution_set,
                                                           const HypervolumeIndicator<int64_t, Solution>& hv_space) const override {
     std::vector<Candidate> candidate_items;
     for (int i = 0; i < N; i++) {
       if (this->current_used_items[i]) continue;
       if (this->items[i].weight > this->current_weight) continue;
-      auto aux_upper_bound = this->current_upper_bound.simulate_add_item(this->current_used_items, i);
+      auto aux_upper_bound = this->current_upper_bound.simulate_add_item(this->current_used_items, i); // Amortized upper bound
+      // auto aux_upper_bound = this->greedyUpperBound(this->items[i]); // Greedy upper bound: O(N^2)
       int64_t hv = hv_space.contribution(aux_upper_bound);
       if (hv > 0) {
         candidate_items.push_back({i, hv});
@@ -389,11 +393,68 @@ class MOKP : public ProblemBase<Solution, Candidate> {
   const std::vector<std::vector<int64_t>> values;  // Values of the items
   const std::vector<Item> items;                   // Items
   const std::vector<Solution> nondominated_set;    // Nondominated set
+  std::vector<std::vector<Item>> sorted_items_objectives;  // Sorted items by objectives
   Solution reference_point;
   UpperBound current_upper_bound;
   Solution current_solution;
   std::vector<bool> current_used_items;
   int64_t current_weight;
+
+  [[nodiscard]] Solution greedyUpperBound(const Item & try_item) const {
+    std::vector<int64_t> upper_bound = this->current_solution;
+    // Add the item values to the upper bound
+    for (int i = 0; i < this->M; i++) {
+      upper_bound[i] += try_item.values[i];
+    }
+    for (int i = 0; i < this->M; i++) {
+      int64_t remaining_weight = this->current_weight - try_item.weight;
+      for (int j = 0; j < this->N; j++) {
+        const Item& item = this->sorted_items_objectives[i][j];
+        if (current_used_items[item.idx] || try_item.idx == item.idx) continue;
+        if (remaining_weight - item.weight >= 0) {
+          upper_bound[i] += item.values[i];
+          remaining_weight -= item.weight;
+        } else {
+          int64_t value = item.values[i];
+          int64_t weight = item.weight;
+          // if (j > 0 && j + 1 < this->N) {
+          //   const Item& prev_item = this->sorted_items_objectives[i][j - 1];
+          //   const Item& next_item = this->sorted_items_objectives[i][j + 1];
+          //   // Martello and Toth upper bound
+          //   int64_t value_prev = prev_item.values[i];
+          //   int64_t weight_prev = prev_item.weight;
+          //   int64_t value_next = next_item.values[i];
+          //   int64_t weight_next = next_item.weight;
+          //   // Calculate the two upper bounds
+          //   int64_t ub1 = (remaining_weight * value_next) / weight_next;
+          //   int64_t ub2 = value - (((weight - remaining_weight) * value_prev) / weight_prev);
+          //   upper_bound[i] += std::max(ub1, ub2);
+          // } else {
+          //   // Dantzigs upper bound
+          //   upper_bound[i] += (remaining_weight * value) / weight;
+          // }
+          upper_bound[i] += (remaining_weight * value) / weight;
+          break;
+        }
+      }
+    }
+    return upper_bound;
+  }
+
+  [[nodiscard]] std::vector<std::vector<Item>> sortItemsObjectives(const std::vector<Item>& items) {
+    std::vector<std::vector<Item>> sorted_items(this->M);
+    for (int i = 0; i < M; i++) {
+      sorted_items[i] = items;
+      std::sort(sorted_items[i].begin(), sorted_items[i].end(),
+                [i](const Item& a, const Item& b) {
+                  double ra = static_cast<double>(a.values[i]) / a.weight;
+                  double rb = static_cast<double>(b.values[i]) / b.weight;
+                  if (ra != rb) return ra > rb;
+                  return a.weight < b.weight;
+                });
+    }
+    return sorted_items;
+  }
 };
 
 #endif  // MOKP_HPP

@@ -53,6 +53,13 @@ bool strictly_dominates(const std::vector<T>& v1, const std::vector<T>& v2, cons
 }
 
 template <typename T>
+bool strictly_dominates(const std::vector<T>& sol, const std::vector<std::vector<T>>& solutions, const bool& is_maximization) {
+  return std::none_of(solutions.begin(), solutions.end(), [&](const std::vector<T>& s) {
+    return strictly_dominates(s, sol, is_maximization);
+  });
+}
+
+template <typename T>
 bool is_non_dominated(const std::vector<T>& sol, const std::vector<std::vector<T>>& solutions, const bool& is_maximization) {
   return std::none_of(solutions.begin(), solutions.end(), [&](const std::vector<T>& s) {
     return weakly_dominates(s, sol, is_maximization);

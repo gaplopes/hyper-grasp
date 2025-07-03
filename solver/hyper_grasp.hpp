@@ -3,14 +3,13 @@
 
 #include <cstdlib>
 #include <ctime>
-#include <tuple>
-#include <vector>
-
-#include <problem_base.hpp>
 #include <dominance.hpp>
-#include <hypervolume_indicator.hpp>
+#include <indicator.hpp>
+#include <problem_base.hpp>
 #include <statistics.hpp>
 #include <stopping_criteria.hpp>
+#include <tuple>
+#include <vector>
 
 template <typename Problem, typename Solution, typename Candidate>
 class HyperGRASP {
@@ -27,13 +26,14 @@ class HyperGRASP {
     // Initialize variables for the algorithm
     std::vector<Solution> solutions;
     Solution ref_point = problem.getReferencePoint();
+    // Solution ref_point = problem.compute_nadir_nset(problem.getNondominatedSet(), is_maximization); // Uncomment this line to use the nadir point as reference
     HypervolumeIndicator<int64_t, Solution> hvc_space(ref_point, is_maximization);
 
     // Initialize variables for statistics
-    std::vector<std::tuple<int32_t, int64_t>> statistics;
+    std::vector<std::tuple<double, int32_t, int64_t>> statistics;
     int64_t iterations = 0, skipped_iterations = 0;
     auto start_time = std::chrono::high_resolution_clock::now();
-    statistics.emplace_back(std::make_tuple(0, 0));
+    statistics.emplace_back(std::make_tuple(0, 0, 0));
 
     // Start the algorithm
     stopping_criteria.start();
@@ -42,12 +42,12 @@ class HyperGRASP {
 
       problem.reset();
       Solution current_solution = problem.emptySolution();
-      std::vector<Candidate> candidates = problem.generateCandidates(current_solution, hvc_space);
+      std::vector<Candidate> candidates = problem.generateCandidates(current_solution, solutions, hvc_space);
 
       while (!candidates.empty()) {
         std::vector<Candidate> selected_candidates = problem.selectCandidates(candidates, alpha);
         current_solution = problem.chooseCandidate(selected_candidates);
-        candidates = problem.generateCandidates(current_solution, hvc_space);
+        candidates = problem.generateCandidates(current_solution, solutions, hvc_space);
       }
 
       if (problem.isFeasible(current_solution) &&
@@ -81,11 +81,12 @@ class HyperGRASP {
 
       stopping_criteria.increment();
       if (stopping_criteria.shouldRetrieve()) {
-        statistics.emplace_back(std::make_tuple(solutions.size(), hvc_space.value()));
+        statistics.emplace_back(std::make_tuple(stopping_criteria.current(), solutions.size(), hvc_space.value()));
         stopping_criteria.resetRetrieveCriteria();
       }
     }
 
+    statistics.emplace_back(std::make_tuple(stopping_criteria.current(), solutions.size(), hvc_space.value()));
     auto now = std::chrono::high_resolution_clock::now();
     auto elapsed_time = std::chrono::duration<double>(now - start_time).count();
 
