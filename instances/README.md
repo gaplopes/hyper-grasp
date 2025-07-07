@@ -1,6 +1,19 @@
-# Instance File Format
+# Multiobjective Combinatorial Optimization Instances
 
-This directory contains instances for some of the implemented Multiobjective Combinatorial Optimization Problems.
+This directory contains instances for some of the implemented Multiobjective Combinatorial Optimization Problems, specifically the Multiobjective Knapsack Problem (MOKP) and the Multiobjective Minimum Spanning Tree (MOMST).
+
+## Instance Types
+
+The repository includes randomly generated instances for both problem types:
+
+- MOKP: Random instances generated using the [mobkp-instances](https://github.com/gaplopes/mobkp-instances) repository.
+- MOMST: Complete graph instances generated using similar parameters to the random MOKP instances.
+
+In the original research paper, the following benchmark instances from literature were also used for experimental evaluation:
+
+- MOKP: Instances from [Bazgan et al. (2009)](https://doi.org/10.1016/j.cor.2007.09.009)
+
+- MOMST: Instances from [Fernandes et al. (2020)](https://doi.org/10.1007/s10589-019-00154-1)
 
 ## Multiobjective Knapsack Problem (MOKP)
 
@@ -40,8 +53,7 @@ vn v1 v2 ... vm       // values for solution n
 5 3 5     // item 3: values [3,5], weight 5
 ```
 
-The current instances are based on the following sources:
-- [mobkp-instances](https://github.com/gaplopes/mobkp-instances)
+The MOKP instances are randomly generated instances from the [mobkp-instances](https://github.com/gaplopes/mobkp-instances).
 
 ## Multiobjective Minimum Spanning Tree (MOMST)
 
@@ -80,4 +92,4 @@ vN v1 v2 ... vM         // values for solution N
 2 3 2 2    // edge 5: 2->3, values [2,2]
 ```
 
-The current instances are based on the same sources script as the MOKP instances.
+The MOMST instances are complete graphs generated based on the same source script as the random MOKP instances. (see [mobkp-instances](https://github.com/gaplopes/mobkp-instances)).
