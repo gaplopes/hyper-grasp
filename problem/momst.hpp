@@ -169,6 +169,7 @@ class MOMST : public ProblemBase<Solution, Candidate> {
   }
 
   [[nodiscard]] std::vector<Candidate> generateCandidates(const Solution& current_solution,
+                                                          const std::vector<Solution>& solution_set,
                                                           const HypervolumeIndicator<int64_t, Solution>& hvc_space) const override {
     std::vector<Candidate> candidate_edges;
     for (int i = 0; i < E; i++) {

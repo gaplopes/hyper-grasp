@@ -1,7 +1,7 @@
 #ifndef STATISTICS_HPP
 #define STATISTICS_HPP
 
-#include <hypervolume_indicator.hpp>
+#include <indicator.hpp>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -12,7 +12,7 @@ class Statistics {
   Problem problem;
   std::vector<Solution> nondominated_set;
   std::vector<Solution> solutions;
-  std::vector<std::tuple<int32_t, int64_t>> statistics;
+  std::vector<std::tuple<double, int32_t, int64_t>> statistics;
   double elapsed_time;
   int64_t seed;
   int iterations;
@@ -22,7 +22,7 @@ class Statistics {
   Statistics(Problem problem,
              std::vector<Solution> solutions,
              int64_t seed,
-             std::vector<std::tuple<int32_t, int64_t>> statistics,
+             std::vector<std::tuple<double, int32_t, int64_t>> statistics,
              double elapsed_time,
              int iterations,
              int skipped_iterations,
@@ -53,7 +53,7 @@ class Statistics {
     std::string stats_str;
     stats_str += std::to_string(seed) + "\n";
     for (const auto& stat : statistics) {
-      stats_str += "(" + std::to_string(std::get<0>(stat)) + "," + std::to_string(std::get<1>(stat)) + ") ";
+      stats_str += "(" + std::to_string(std::get<0>(stat)) + "," + std::to_string(std::get<1>(stat)) + "," + std::to_string(std::get<2>(stat)) + ") ";
     }
     stats_str.pop_back();  // Remove the trailing space
     stats_str += "\n";
@@ -84,6 +84,36 @@ class Statistics {
   void to_file(const std::string& filename) {
     std::ofstream file(filename);
     file << to_string();
+    file.close();
+  }
+
+  void to_debug_file() {
+    std::ofstream file("debug.out");
+    file << "Non-dominated set\n";
+    for (const auto& sol : nondominated_set) {
+      for (std::size_t j = 0; j < sol.size(); ++j) {
+        file << sol[j];
+        if (j != sol.size() - 1) {
+          file << " ";
+        }
+      }
+      file << "\n";
+    }
+    file << "GRASP set\n";
+    for (const auto& sol : solutions) {
+      for (std::size_t j = 0; j < sol.size(); ++j) {
+        file << sol[j];
+        if (j != sol.size() - 1) {
+          file << " ";
+        }
+      }
+      file << "\n";
+    }
+    file << "Hypervolume growth\n";
+    file << nondominated_set_hv << "\n";
+    for (const auto& stat : statistics) {
+      file << std::get<1>(stat) << "\n";
+    }
     file.close();
   }
 

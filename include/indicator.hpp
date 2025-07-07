@@ -1,15 +1,14 @@
-#ifndef HYPERVOLUME_INDICATOR_HPP
-#define HYPERVOLUME_INDICATOR_HPP
+#ifndef INDICATOR_HPP
+#define INDICATOR_HPP
 
 #include <cstdint>
-#include <vector>
-
 #include <mooutils/indicators.hpp>
+#include <vector>
 
 template <typename T, typename Solution>
 class HypervolumeIndicator {
  public:
-  HypervolumeIndicator(Solution ref_point, bool is_maximization)
+  HypervolumeIndicator(Solution ref_point, bool is_maximization = true)
       : ref_point(ref_point),
         is_maximization(is_maximization),
         hv_space(initialize_hv_space(ref_point, is_maximization)) {}
@@ -53,4 +52,4 @@ class HypervolumeIndicator {
   mooutils::incremental_hv<T, Solution> hv_space;
 };
 
-#endif  // HYPERVOLUME_INDICATOR_HPP
+#endif  // INDICATOR_HPP
