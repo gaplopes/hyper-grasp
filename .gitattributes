@@ -1,0 +1,10 @@
+# Normalize line endings for all text files
+* text=auto
+
+# Mark C++ files correctly
+*.cpp linguist-language=C++
+*.hpp linguist-language=C++
+
+# Mark .in files as input files
+*.in linguist-detectable=false
+*.in text
